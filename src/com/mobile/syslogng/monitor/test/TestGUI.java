@@ -76,9 +76,8 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	
 	public void testCertificateConfiguration(){
 		if(solo.waitForFragmentByTag("fragment_welcome_tag")){
-			solo.clickOnButton("Add Instance");
+			solo.clickOnButton("Add Syslog-ng");
 			if(solo.waitForFragmentByTag("fragment_addsyslogng_tag")){
-				Log.e("FRAGMENT", "Add syslogng fragment");
 				//Check whether the checkbox is disabled by performing a click.
 				solo.clickOnCheckBox(0);
 				if(solo.isCheckBoxChecked("Include Client Certificate")){
@@ -93,17 +92,34 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 			}
 			
 		}
+		else{
+			solo.clickOnActionBarHomeButton();
+			solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
+			if(solo.waitForFragmentByTag("fragment_addsyslogng_tag")){
+				//Check whether the checkbox is disabled by performing a click.
+				solo.clickOnCheckBox(0);
+				if(solo.isCheckBoxChecked("Include Client Certificate")){
+					assertTrue(true);
+				}
+				else{
+					solo.clickOnButton("Import Certificate");
+					if(!isEmulator()){
+						assertTrue(isFileManagerAvailable() && importCertificate());
+					}
+				}
+			}
+		}
 	}
 	
 	public void testAddSyslogngFields(){
 		solo.clickOnActionBarHomeButton();
 		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
-		solo.clickOnButton("Add Instance");
+		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Enter valid host/port details"));
 		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Syslog-ng Name");
 		solo.typeText(solo.getEditText("Enter Hostname"), "Syslog-ng Hostname");
 		solo.typeText(solo.getEditText("Enter Port Number"), "Syslog-ng Portnumber");
-		solo.clickOnButton("Add Instance");
+		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Port entered is not a Number"));
 		solo.clickOnCheckBox(0);
 		assertTrue(solo.isCheckBoxChecked("Include Client Certificate"));
@@ -119,16 +135,16 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.typeText(solo.getEditText("Enter Hostname"), "hostname");
 		solo.typeText(solo.getEditText("Enter Port Number"), "1234");
 		solo.sleep(500);
-		solo.clickOnButton("Add Instance");
-		assertTrue(solo.waitForText("Instance successfully added into Database"));
+		solo.clickOnButton("Add Syslog-ng");
+		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 		
 		//Add a Valid Syslog-ng without Certificate
 		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/No Certificate");
 		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
 		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
 		solo.sleep(500);
-		solo.clickOnButton("Add Instance");
-		assertTrue(solo.waitForText("Instance successfully added into Database"));
+		solo.clickOnButton("Add Syslog-ng");
+		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 		
 		//Add a valid Syslog-ng with Certificate with correct password
 		if(!isEmulator()){
@@ -144,8 +160,8 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 			}
 			solo.typeText(solo.getEditText("Enter password"), "krrisss");
 			solo.sleep(500);
-			solo.clickOnButton("Add Instance");
-			assertTrue(solo.waitForText("Instance successfully added into Database"));
+			solo.clickOnButton("Add Syslog-ng");
+			assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 			
 		}
 		
@@ -162,8 +178,8 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 			}
 			solo.typeText(solo.getEditText("Enter password"), "wrong");
 			solo.sleep(500);
-			solo.clickOnButton("Add Instance");
-			assertTrue(solo.waitForText("Instance successfully added into Database"));
+			solo.clickOnButton("Add Syslog-ng");
+			assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 			
 		}
 		
@@ -175,8 +191,8 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 			solo.clickOnCheckBox(0);
 		}
 		solo.sleep(500);
-		solo.clickOnButton("Add Instance");
-		assertTrue(solo.waitForText("Instance successfully added into Database"));
+		solo.clickOnButton("Add Syslog-ng");
+		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 	}
 	
 	
