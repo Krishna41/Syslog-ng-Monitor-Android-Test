@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 
 @SuppressWarnings("unchecked")
@@ -117,6 +118,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Sample Syslogng");
 		solo.typeText(solo.getEditText("Enter Hostname"), "hostname");
 		solo.typeText(solo.getEditText("Enter Port Number"), "1234");
+		solo.sleep(500);
 		solo.clickOnButton("Add Instance");
 		assertTrue(solo.waitForText("Instance successfully added into Database"));
 		
@@ -124,30 +126,46 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/No Certificate");
 		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
 		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+		solo.sleep(500);
 		solo.clickOnButton("Add Instance");
 		assertTrue(solo.waitForText("Instance successfully added into Database"));
 		
 		//Add a valid Syslog-ng with Certificate with correct password
-		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/Certificate/Password");
-		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
-		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
-		if(!solo.isCheckBoxChecked("Include Client Certificate")){
-			solo.clickOnCheckBox(0);
+		if(!isEmulator()){
+			solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/Certificate/Password");
+			solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+			solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+			
+			if(!solo.isCheckBoxChecked("Include Client Certificate")){
+				solo.clickOnCheckBox(0);
+				Spinner spinnerView = solo.getView(Spinner.class, 0);
+				solo.clickOnView(spinnerView);
+				solo.clickOnView(solo.getText("sample.pfx"));
+			}
+			solo.typeText(solo.getEditText("Enter password"), "krrisss");
+			solo.sleep(500);
+			solo.clickOnButton("Add Instance");
+			assertTrue(solo.waitForText("Instance successfully added into Database"));
+			
 		}
-		solo.typeText(solo.getEditText("Enter password"), "krrisss");
-		solo.clickOnButton("Add Instance");
-		assertTrue(solo.waitForText("Instance successfully added into Database"));
 		
 		//Add a valid Syslog-ng with Certificate and wrong password
-		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Valid Syslogng/Certificate/WrongPassword");
-		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
-		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
-		if(!solo.isCheckBoxChecked("Include Client Certificate")){
-			solo.clickOnCheckBox(0);
+		if(!isEmulator()){
+			solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Valid Syslogng/Certificate/WrongPassword");
+			solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+			solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+			if(!solo.isCheckBoxChecked("Include Client Certificate")){
+				solo.clickOnCheckBox(0);
+				Spinner spinnerView = solo.getView(Spinner.class, 0);
+				solo.clickOnView(spinnerView);
+				solo.clickOnView(solo.getText("sample.pfx"));
+			}
+			solo.typeText(solo.getEditText("Enter password"), "wrong");
+			solo.sleep(500);
+			solo.clickOnButton("Add Instance");
+			assertTrue(solo.waitForText("Instance successfully added into Database"));
+			
 		}
-		solo.typeText(solo.getEditText("Enter password"), "wrong");
-		solo.clickOnButton("Add Instance");
-		assertTrue(solo.waitForText("Instance successfully added into Database"));
 		
 		//Add a Inactive Syslog-ng
 		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Inactive Syslogng");
@@ -156,6 +174,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		if(solo.isCheckBoxChecked("Include Client Certificate")){
 			solo.clickOnCheckBox(0);
 		}
+		solo.sleep(500);
 		solo.clickOnButton("Add Instance");
 		assertTrue(solo.waitForText("Instance successfully added into Database"));
 	}
