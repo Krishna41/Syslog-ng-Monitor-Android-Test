@@ -19,6 +19,7 @@ import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListView;
 
 
@@ -61,16 +62,16 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		TestSuite t = new TestSuite();
 		t.addTest(TestSuite.createTest(TestGUI.class, "testAppLoad"));
 		t.addTest(TestSuite.createTest(TestGUI.class, "testCertificateConfiguration"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngFields"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngs"));
 		
 		return t;
 	}
 	
 	
 	public void testAppLoad() {
-			
 		assertTrue(solo.waitForFragmentByTag("fragment_welcome_tag", 2000) || solo.waitForFragmentByTag("fragment_monitored_syslogng_tag", 2000));
-		
-		}
+	}
 	
 	public void testCertificateConfiguration(){
 		if(solo.waitForFragmentByTag("fragment_welcome_tag")){
@@ -86,13 +87,80 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 					solo.clickOnButton("Import Certificate");
 					if(!isEmulator()){
 						assertTrue(isFileManagerAvailable() && importCertificate());
-						activity.onBackPressed();
 					}
 				}
 			}
 			
 		}
 	}
+	
+	public void testAddSyslogngFields(){
+		solo.clickOnActionBarHomeButton();
+		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
+		solo.clickOnButton("Add Instance");
+		assertTrue(solo.waitForText("Enter valid host/port details"));
+		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Syslog-ng Name");
+		solo.typeText(solo.getEditText("Enter Hostname"), "Syslog-ng Hostname");
+		solo.typeText(solo.getEditText("Enter Port Number"), "Syslog-ng Portnumber");
+		solo.clickOnButton("Add Instance");
+		assertTrue(solo.waitForText("Port entered is not a Number"));
+		solo.clickOnCheckBox(0);
+		assertTrue(solo.isCheckBoxChecked("Include Client Certificate"));
+	}
+	
+	
+	
+	public void testAddSyslogngs(){
+		solo.clickOnActionBarHomeButton();
+		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
+		//Add a Sample Instance to test edit and delete
+		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Sample Syslogng");
+		solo.typeText(solo.getEditText("Enter Hostname"), "hostname");
+		solo.typeText(solo.getEditText("Enter Port Number"), "1234");
+		solo.clickOnButton("Add Instance");
+		assertTrue(solo.waitForText("Instance successfully added into Database"));
+		
+		//Add a Valid Syslog-ng without Certificate
+		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/No Certificate");
+		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+		solo.clickOnButton("Add Instance");
+		assertTrue(solo.waitForText("Instance successfully added into Database"));
+		
+		//Add a valid Syslog-ng with Certificate with correct password
+		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/Certificate/Password");
+		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+		if(!solo.isCheckBoxChecked("Include Client Certificate")){
+			solo.clickOnCheckBox(0);
+		}
+		solo.typeText(solo.getEditText("Enter password"), "krrisss");
+		solo.clickOnButton("Add Instance");
+		assertTrue(solo.waitForText("Instance successfully added into Database"));
+		
+		//Add a valid Syslog-ng with Certificate and wrong password
+		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Valid Syslogng/Certificate/WrongPassword");
+		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+		if(!solo.isCheckBoxChecked("Include Client Certificate")){
+			solo.clickOnCheckBox(0);
+		}
+		solo.typeText(solo.getEditText("Enter password"), "wrong");
+		solo.clickOnButton("Add Instance");
+		assertTrue(solo.waitForText("Instance successfully added into Database"));
+		
+		//Add a Inactive Syslog-ng
+		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Inactive Syslogng");
+		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		solo.typeText(solo.getEditText("Enter Port Number"), "212");
+		if(solo.isCheckBoxChecked("Include Client Certificate")){
+			solo.clickOnCheckBox(0);
+		}
+		solo.clickOnButton("Add Instance");
+		assertTrue(solo.waitForText("Instance successfully added into Database"));
+	}
+	
+	
 	
 	private boolean isEmulator() {
         return Build.FINGERPRINT.startsWith("generic");
