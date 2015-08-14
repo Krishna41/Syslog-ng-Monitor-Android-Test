@@ -19,6 +19,7 @@ import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -61,10 +62,11 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	
 	public static TestSuite suite(){
 		TestSuite t = new TestSuite();
-		t.addTest(TestSuite.createTest(TestGUI.class, "testAppLoad"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testCertificateConfiguration"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngFields"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngs"));
+		//t.addTest(TestSuite.createTest(TestGUI.class, "testAppLoad"));
+		//t.addTest(TestSuite.createTest(TestGUI.class, "testCertificateConfiguration"));
+		//t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngFields"));
+		//t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngs"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testEditSyslogng"));
 		
 		return t;
 	}
@@ -116,9 +118,9 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Enter valid host/port details"));
-		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Syslog-ng Name");
-		solo.typeText(solo.getEditText("Enter Hostname"), "Syslog-ng Hostname");
-		solo.typeText(solo.getEditText("Enter Port Number"), "Syslog-ng Portnumber");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Syslog-ng Name");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "Syslog-ng Hostname");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "Syslog-ng Portnumber");
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Port entered is not a Number"));
 		solo.clickOnCheckBox(0);
@@ -131,26 +133,26 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.clickOnActionBarHomeButton();
 		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
 		//Add a Sample Instance to test edit and delete
-		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Sample Syslogng");
-		solo.typeText(solo.getEditText("Enter Hostname"), "hostname");
-		solo.typeText(solo.getEditText("Enter Port Number"), "1234");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Sample Syslogng");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "hostname");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "1234");
 		solo.sleep(500);
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 		
 		//Add a Valid Syslog-ng without Certificate
-		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/No Certificate");
-		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
-		solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Active Syslogng/No Certificate");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "2121");
 		solo.sleep(500);
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 		
 		//Add a valid Syslog-ng with Certificate with correct password
 		if(!isEmulator()){
-			solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Active Syslogng/Certificate/Password");
-			solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
-			solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+			solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Active Syslogng/Certificate/Password");
+			solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+			solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "2121");
 			
 			if(!solo.isCheckBoxChecked("Include Client Certificate")){
 				solo.clickOnCheckBox(0);
@@ -167,9 +169,9 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		
 		//Add a valid Syslog-ng with Certificate and wrong password
 		if(!isEmulator()){
-			solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Valid Syslogng/Certificate/WrongPassword");
-			solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
-			solo.typeText(solo.getEditText("Enter Port Number"), "2121");
+			solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Valid Syslogng/Certificate/WrongPassword");
+			solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+			solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "2121");
 			if(!solo.isCheckBoxChecked("Include Client Certificate")){
 				solo.clickOnCheckBox(0);
 				Spinner spinnerView = solo.getView(Spinner.class, 0);
@@ -184,15 +186,38 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		}
 		
 		//Add a Inactive Syslog-ng
-		solo.typeText(solo.getEditText("Enter Syslog-ng Name"), "Inactive Syslogng");
-		solo.typeText(solo.getEditText("Enter Hostname"), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
-		solo.typeText(solo.getEditText("Enter Port Number"), "212");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Inactive Syslogng");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "212");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		
 		if(solo.isCheckBoxChecked("Include Client Certificate")){
 			solo.clickOnCheckBox(0);
 		}
 		solo.sleep(500);
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
+	}
+	
+	public void testEditSyslogng(){
+		solo.waitForFragmentByTag("fragment_monitored_syslogng_tag", 1000);
+		ListView listView = (ListView) activity.findViewById(R.id.listview_view_instance);
+		assertTrue(listView.getCount() >= 5);
+		
+		assertTrue(solo.waitForText("Sample Syslogng"));
+		solo.clickLongInList(1);
+		solo.clickInList(2);
+		solo.clickOnView(activity.findViewById(R.id.edit_list_item));
+		assertTrue(solo.waitForText("Select any one Syslog-ng for editing"));
+		solo.clickInList(2);
+		solo.clickOnView(activity.findViewById(R.id.edit_list_item));
+		assertTrue(solo.waitForFragmentByTag("fragment_addsyslogng_tag"));
+		solo.clearEditText((EditText)activity.findViewById(R.id.ai_et_syslogng_name));
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Edited Syslogng ");
+		solo.clickOnButton("Add Syslog-ng");
+		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
+		solo.clickOnActionBarHomeButton();
+		solo.clickOnMenuItem("Monitored Syslog-ng\\(s\\)");
+		assertTrue(solo.waitForText("Edited Syslogng"));
 	}
 	
 	
