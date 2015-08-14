@@ -62,11 +62,12 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	
 	public static TestSuite suite(){
 		TestSuite t = new TestSuite();
-		//t.addTest(TestSuite.createTest(TestGUI.class, "testAppLoad"));
-		//t.addTest(TestSuite.createTest(TestGUI.class, "testCertificateConfiguration"));
-		//t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngFields"));
-		//t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngs"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testAppLoad"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testCertificateConfiguration"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngFields"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngs"));
 		t.addTest(TestSuite.createTest(TestGUI.class, "testEditSyslogng"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testDeleteSyslogng"));
 		
 		return t;
 	}
@@ -116,6 +117,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	public void testAddSyslogngFields(){
 		solo.clickOnActionBarHomeButton();
 		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
+		solo.waitForFragmentByTag("fragment_addsyslogng_tag");
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Enter valid host/port details"));
 		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Syslog-ng Name");
@@ -132,6 +134,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	public void testAddSyslogngs(){
 		solo.clickOnActionBarHomeButton();
 		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
+		solo.waitForFragmentByTag("fragment_addsyslogng_tag");
 		//Add a Sample Instance to test edit and delete
 		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Sample Syslogng");
 		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "hostname");
@@ -187,8 +190,8 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		
 		//Add a Inactive Syslog-ng
 		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Inactive Syslogng");
-		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "212");
-		solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_input), "ec2-54-69-101-145.us-west-2.compute.amazonaws.com");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_port_input), "212");
 		
 		if(solo.isCheckBoxChecked("Include Client Certificate")){
 			solo.clickOnCheckBox(0);
@@ -220,7 +223,15 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		assertTrue(solo.waitForText("Edited Syslogng"));
 	}
 	
-	
+	public void testDeleteSyslogng(){
+		solo.waitForFragmentByTag("fragment_monitored_syslogng_tag", 1000);
+		ListView listView = (ListView)activity.findViewById(R.id.listview_view_instance);
+		Integer syslogngCount = listView.getCount();
+		solo.clickLongInList(1);
+		solo.clickOnView(activity.findViewById(R.id.delete_list_item));
+		assertTrue(solo.waitForText("Deleted Successfully"));
+		assertTrue(syslogngCount > listView.getCount());
+	}
 	
 	private boolean isEmulator() {
         return Build.FINGERPRINT.startsWith("generic");
