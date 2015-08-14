@@ -1,6 +1,7 @@
 package com.mobile.syslogng.monitor.test;
 
 
+import java.util.HashMap;
 import java.util.List;
 
 import junit.framework.Test;
@@ -19,8 +20,10 @@ import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -67,7 +70,12 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngFields"));
 		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngs"));
 		t.addTest(TestSuite.createTest(TestGUI.class, "testEditSyslogng"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testDeleteSyslogng"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testDeleteSyslogng")); 
+		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithoutCertificate"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithCertificate"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithWrongPassword"));
+		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithInactiveSyslogng"));
+		
 		
 		return t;
 	}
@@ -205,17 +213,18 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.waitForFragmentByTag("fragment_monitored_syslogng_tag", 1000);
 		ListView listView = (ListView) activity.findViewById(R.id.listview_view_instance);
 		assertTrue(listView.getCount() >= 5);
-		
 		assertTrue(solo.waitForText("Sample Syslogng"));
-		solo.clickLongInList(1);
-		solo.clickInList(2);
+		Integer sampleSyslogngPosition = findPositionInList("Sample Syslogng");
+		Integer activeSyslogngPosition = findPositionInList("Active Syslogng/No Certificate");
+		solo.clickLongInList(sampleSyslogngPosition);
+		solo.clickInList(activeSyslogngPosition);
 		solo.clickOnView(activity.findViewById(R.id.edit_list_item));
 		assertTrue(solo.waitForText("Select any one Syslog-ng for editing"));
-		solo.clickInList(2);
+		solo.clickInList(activeSyslogngPosition);
 		solo.clickOnView(activity.findViewById(R.id.edit_list_item));
 		assertTrue(solo.waitForFragmentByTag("fragment_addsyslogng_tag"));
 		solo.clearEditText((EditText)activity.findViewById(R.id.ai_et_syslogng_name));
-		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Edited Syslogng ");
+		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Edited Syslogng");
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
 		solo.clickOnActionBarHomeButton();
@@ -227,10 +236,175 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.waitForFragmentByTag("fragment_monitored_syslogng_tag", 1000);
 		ListView listView = (ListView)activity.findViewById(R.id.listview_view_instance);
 		Integer syslogngCount = listView.getCount();
-		solo.clickLongInList(1);
+		Integer editedSyslogngPosition = findPositionInList("Edited Syslogng");
+		solo.clickLongInList(editedSyslogngPosition);
 		solo.clickOnView(activity.findViewById(R.id.delete_list_item));
 		assertTrue(solo.waitForText("Deleted Successfully"));
 		assertTrue(syslogngCount > listView.getCount());
+	}
+	
+	public void testCommandExecutionWithoutCertificate(){
+		Integer position = findPositionInList("Active Syslogng/No Certificate");
+
+		//Test for command - stats
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("stats");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Results"));
+		solo.clickOnButton("OK");
+		
+		//Test for command - is_alive
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("is_alive");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Results"));
+		solo.clickOnButton("OK");
+		
+		//Test for command - show_config
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("show_config");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Results"));
+		solo.clickOnButton("OK");
+		
+		
+	}
+	
+	public void testCommandExecutionWithCertificate(){
+		Integer position = findPositionInList("Active Syslogng/Certificate/Password");
+
+		//Test for command - stats
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("stats");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Results"));
+		solo.clickOnButton("OK");
+		
+		//Test for command - is_alive
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("is_alive");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Results"));
+		solo.clickOnButton("OK");
+		
+		//Test for command - show_config
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("show_config");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Results"));
+		solo.clickOnButton("OK");
+		
+		
+	}
+	
+	public void testCommandExecutionWithWrongPassword(){
+		Integer position = findPositionInList("Valid Syslogng/Certificate/WrongPassword");
+
+		//Test for command - stats
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("stats");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Error"));
+		assertTrue(solo.searchText("PKCS12 key store mac invalid - wrong password or corrupted file."));
+		solo.clickOnButton("OK");
+		
+		//Test for command - is_alive
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("is_alive");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Error"));
+		assertTrue(solo.searchText("PKCS12 key store mac invalid - wrong password or corrupted file."));
+		solo.clickOnButton("OK");
+		
+		//Test for command - show_config
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("show_config");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Error"));
+		assertTrue(solo.searchText("PKCS12 key store mac invalid - wrong password or corrupted file."));
+		solo.clickOnButton("OK");
+		
+		
+	}
+	
+	public void testCommandExecutionWithInactiveSyslogng(){
+		Integer position = findPositionInList("Inactive Syslogng");
+
+		//Test for command - stats
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("stats");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Error"));
+		assertTrue(solo.searchText("ECONNREFUSED"));
+		solo.clickOnButton("OK");
+		
+		//Test for command - is_alive
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("is_alive");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Error"));
+		assertTrue(solo.searchText("ECONNREFUSED"));
+		solo.clickOnButton("OK");
+		
+		//Test for command - show_config
+		
+		solo.clickInList(position);
+		solo.waitForDialogToOpen(500);
+		solo.clickOnText("show_config");
+		solo.clickOnButton("OK");
+		solo.waitForDialogToOpen();
+		assertTrue(solo.searchText("Error"));
+		assertTrue(solo.searchText("ECONNREFUSED"));
+		solo.clickOnButton("OK");
+		
+		
+	}
+	
+	private Integer findPositionInList(String syslogngName){
+		Integer position = -1;
+		ListView listView = (ListView)activity.findViewById(R.id.listview_view_instance);
+		for(Integer i = 0; i<= listView.getCount(); i++){
+			HashMap<String,Object> listItem = (HashMap<String,Object>) listView.getItemAtPosition(i);
+			if(listItem.get("SyslogngName").toString().equals(syslogngName)){
+				position = i+1;
+				break;
+			}
+			
+		}
+		return position;
 	}
 	
 	private boolean isEmulator() {
