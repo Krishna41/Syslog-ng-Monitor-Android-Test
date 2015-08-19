@@ -4,26 +4,16 @@ package com.mobile.syslogng.monitor.test;
 import java.util.HashMap;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import com.robotium.solo.Solo;
-import com.mobile.syslogng.monitor.FileManager;
 import com.mobile.syslogng.monitor.R;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -33,6 +23,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	
 	private static final String LAUNCHER_ACTIVITY_FULL_CLASSNAME = "com.mobile.syslogng.monitor.MainActivity";
 
+	
 	private static Class launcherActivityClass;
 	static {
 		try {
@@ -55,7 +46,9 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	
 	
 	private Solo solo;
-	private Activity activity;
+	private static Activity activity;
+	private static SyslogngApplicationData data;
+	private static Integer testCount = 0;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -63,22 +56,6 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		activity = getActivity();
 	}
 	
-	public static TestSuite suite(){
-		TestSuite t = new TestSuite();
-		t.addTest(TestSuite.createTest(TestGUI.class, "testAppLoad"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testCertificateConfiguration"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngFields"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testAddSyslogngs"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testEditSyslogng"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testDeleteSyslogng")); 
-		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithoutCertificate"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithCertificate"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithWrongPassword"));
-		t.addTest(TestSuite.createTest(TestGUI.class, "testCommandExecutionWithInactiveSyslogng"));
-		
-		
-		return t;
-	}
 	
 	
 	public void testAppLoad() {
@@ -97,7 +74,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 				else{
 					solo.clickOnButton("Import Certificate");
 					if(!isEmulator()){
-						assertTrue(isFileManagerAvailable() && importCertificate());
+						assertTrue(isFileManagerAvailable());
 					}
 				}
 			}
@@ -115,7 +92,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 				else{
 					solo.clickOnButton("Import Certificate");
 					if(!isEmulator()){
-						assertTrue(isFileManagerAvailable() && importCertificate());
+						assertTrue(isFileManagerAvailable());
 					}
 				}
 			}
@@ -169,9 +146,9 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 				solo.clickOnCheckBox(0);
 				Spinner spinnerView = solo.getView(Spinner.class, 0);
 				solo.clickOnView(spinnerView);
-				solo.clickOnView(solo.getText("sample.pfx"));
+				solo.clickOnView(solo.getText("SampleCertificate.pfx"));
 			}
-			solo.typeText(solo.getEditText("Enter password"), "krrisss");
+			solo.typeText(solo.getEditText("Enter password"), "samplepassword");
 			solo.sleep(500);
 			solo.clickOnButton("Add Syslog-ng");
 			assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
@@ -187,7 +164,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 				solo.clickOnCheckBox(0);
 				Spinner spinnerView = solo.getView(Spinner.class, 0);
 				solo.clickOnView(spinnerView);
-				solo.clickOnView(solo.getText("sample.pfx"));
+				solo.clickOnView(solo.getText("SampleCertificate.pfx"));
 			}
 			solo.typeText(solo.getEditText("Enter password"), "wrong");
 			solo.sleep(500);
@@ -429,19 +406,16 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	 * Please replace sourcePath with a actual path available in your device.
 	 * 
 	 */
-	private Boolean importCertificate(){
-		Boolean status;
-		String sourcePath = "/storage/emulated/0/Download/certpkcs12.pfx";
-		String certificateName = "sample.pfx";
-		FileManager fManager = new FileManager(activity.getApplicationContext());
-		fManager.createCertificateDirectory();
-		status = fManager.copyFile(sourcePath, fManager.getCertificateFile(certificateName));
-		return status;
-	}
+	
 	
 	
 	@Override
 	public void tearDown() throws Exception {
 		solo.finishOpenedActivities();
+		testCount++;
+		if(testCount.equals(10)){
+			data = new SyslogngApplicationData(activity.getApplicationContext());
+			data.remove();
+		}
 	}
 }
