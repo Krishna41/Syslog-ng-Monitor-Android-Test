@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -81,7 +82,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 			
 		}
 		else{
-			solo.clickOnActionBarHomeButton();
+			clickOnActionBarHomeButton(solo);
 			solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
 			if(solo.waitForFragmentByTag("fragment_addsyslogng_tag")){
 				//Check whether the checkbox is disabled by performing a click.
@@ -100,7 +101,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	}
 	
 	public void testAddSyslogngFields(){
-		solo.clickOnActionBarHomeButton();
+		clickOnActionBarHomeButton(solo);
 		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
 		solo.waitForFragmentByTag("fragment_addsyslogng_tag");
 		solo.clickOnButton("Add Syslog-ng");
@@ -117,7 +118,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	
 	
 	public void testAddSyslogngs(){
-		solo.clickOnActionBarHomeButton();
+		clickOnActionBarHomeButton(solo);
 		solo.clickOnMenuItem("Add/Update Syslog-ng to monitor");
 		solo.waitForFragmentByTag("fragment_addsyslogng_tag");
 		//Add a Sample Instance to test edit and delete
@@ -204,7 +205,7 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 		solo.typeText((EditText)activity.findViewById(R.id.ai_et_syslogng_name), "Edited Syslogng");
 		solo.clickOnButton("Add Syslog-ng");
 		assertTrue(solo.waitForText("Syslog-ng successfully added into Database"));
-		solo.clickOnActionBarHomeButton();
+		clickOnActionBarHomeButton(solo);
 		solo.clickOnMenuItem("Monitored Syslog-ng\\(s\\)");
 		assertTrue(solo.waitForText("Edited Syslogng"));
 	}
@@ -407,6 +408,11 @@ public class TestGUI extends ActivityInstrumentationTestCase2{
 	 * 
 	 */
 	
+	
+	public void clickOnActionBarHomeButton(Solo solo) {
+	    View homeView = solo.getView(android.R.id.home);
+	    solo.clickOnView(homeView);
+	}
 	
 	
 	@Override
